@@ -139,7 +139,8 @@ public class BoardDao {
 								+ " b.no, b.user_no, b.depth, b.g_no, b.removed"								
 								+ " from user a, board b"
 								+ " where a.no = b.user_no "+ like 
-								+ " and "+  getWhere()
+								+ " and "+  getWhere() 
+								+ " group by b.no"
 								+ " order by b.g_no desc, o_no asc"
 								+ " limit ?, ?";			
 			
@@ -467,16 +468,12 @@ public class BoardDao {
 	}
 	
 	private String getWhere() {
-		String where = "((b.removed = true and 0 <(select count(*) from board where"
-				+ " g_no = b.g_no and depth > b.o_no and o_no > b.depth"
-				+ " and o_no < (select o_no from board"
-				+ " where g_no = b.g_no and o_no > b.o_no and depth = b.depth"
-				+ " order by o_no asc limit 0, 1)) and removed = false and"
-				+ " (((select count(*) from board where g_no = b.g_no) > 1 )" 
-				+ " and (b.depth < (select max(depth) from board where g_no = b.g_no and removed = false)))" 
-				+ " and ((select count(*) from board where g_no = b.g_no and  depth >= b.depth) <>" 
-				+ " (select count(*) from board where g_no = b.g_no and depth >= b.depth and removed =  true)))" 
-				+ " or b.removed = false)";
+		String where = "removed=false or (removed = true and ((b.o_no = (select max(o_no) o_no"
+					+ " from board where g_no=b.g_no and depth=b.depth) and (select (select count(*)"
+					+ " from board where g_no = b.g_no and o_no > b.o_no and depth > b.depth and removed = false)>0)"
+					+ " or ((select count(*) from board where g_no = b.g_no and o_no > b.o_no"
+					+ " and depth > b.depth and o_no < (select o_no from board where g_no = b.g_no and o_no > b.o_no"
+					+ " and depth = b.depth order by o_no asc limit 0, 1) and removed = false)>0))))";
 		return where;
 	}
 }

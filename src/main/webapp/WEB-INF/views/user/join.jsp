@@ -17,14 +17,14 @@
 				<form id="join-form" name="joinForm" method="post" action="${path }/user/join">
 					<input type="hidden" name="a" value="join" />
 					<label class="block-label" for="name">이름</label>
-					<input id="name" name="name" type="text" value="">
+					<input id="name" name="name" type="text" value="" required>
 
 					<label class="block-label" for="email">이메일</label>
-					<input id="email" name="email" type="text" value="">
+					<input id="email" name="email" type="text" value="" required>
 					<input type="button" value="id 중복체크">
 					
 					<label class="block-label">패스워드</label>
-					<input name="password" type="password" value="">
+					<input name="password" type="password" value="" required>
 					
 					<fieldset>
 						<legend>성별</legend>

@@ -28,7 +28,7 @@
 						</tr>
 						<tr>
 							<td class="label">제목</td>
-							<td><input type="text" name="title" value=""></td>
+							<td><input type="text" name="title" value="" required></td>
 						</tr>
 						<tr>
 							<td class="label">내용</td>

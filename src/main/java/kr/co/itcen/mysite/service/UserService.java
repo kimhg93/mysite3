@@ -14,12 +14,11 @@ public class UserService {
 	public void join(UserVo vo) {
 		userDao.insert(vo);
 	}
-
 	public UserVo getUser(UserVo vo) {		
 		return userDao.get(vo);
 	}
 	public UserVo getUpdateUser(Long no) {
-		return new UserDao().get(no);
+		return userDao.get(no);
 	}
 	public void update(UserVo vo) {
 		userDao.update(vo);		
