@@ -11,9 +11,30 @@ public class BoardVo {
 	private int groupNo;
 	private int orderNo;
 	private int depth;
+	private int page;
+	private String keyWord;
 	private boolean removed;
+	private String move;
 	
 	
+	public String getMove() {
+		return move;
+	}
+	public void setMove(String move) {
+		this.move = move;
+	}
+	public int getPage() {
+		return page;
+	}
+	public void setPage(int page) {
+		this.page = page;
+	}
+	public String getKeyWord() {
+		return keyWord;
+	}
+	public void setKeyWord(String keyWord) {
+		this.keyWord = keyWord;
+	}
 	public boolean getRemoved() {
 		return removed;
 	}

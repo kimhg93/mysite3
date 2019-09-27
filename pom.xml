@@ -8,6 +8,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<org.springframework-version>4.3.24.RELEASE</org.springframework-version>
+		<jcloverslf4j.version>1.7.6</jcloverslf4j.version>		
+		<logback.version>1.1.1</logback.version>
 	</properties>
 
 	<dependencies>
@@ -16,6 +18,13 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${org.springframework-version}</version>
+			
+			<exclusions>
+				<exclusion>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		
 		<!-- spring web -->
@@ -55,9 +64,9 @@
 		
 		<!-- Common DBCP -->
 		<dependency>
-		<groupId>commons-dbcp</groupId>
-		<artifactId>commons-dbcp</artifactId>
-		<version>1.4</version>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.4</version>
 		</dependency>
 		
 		<!-- maria db driver -->
@@ -73,7 +82,19 @@
 			<artifactId>jstl</artifactId>
 			<version>1.2</version>
 		</dependency>
-			
+		
+		<dependency>                                    
+			<groupId>org.slf4j</groupId>                
+			<artifactId>jcl-over-slf4j</artifactId>     
+			<version>${jcloverslf4j.version}</version>  
+		</dependency>
+		
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback.version}</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

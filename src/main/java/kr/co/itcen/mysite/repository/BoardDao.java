@@ -6,14 +6,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import kr.co.itcen.mysite.vo.BoardVo;
 
 @Repository
-public class BoardDao {	
+public class BoardDao {
+	
+	@Autowired
+	private SqlSession sqlSession;
+	
 	private Connection getConnection() throws SQLException {
 		Connection connection = null;
 		try {
@@ -27,165 +35,26 @@ public class BoardDao {
 	}
 	
 	public void insert(BoardVo vo) {
-		Connection connection = null;		
-		PreparedStatement pstmt = null;
-		try {
-			connection = getConnection();
-
-			String sql = "insert into board values(null, ?, ?, 0, now(), ?, ?, ?, ?, ?)";
-			pstmt = connection.prepareStatement(sql);
-			pstmt.setString(1, vo.getTitle());
-			pstmt.setString(2, vo.getContents());
-			pstmt.setInt(3, vo.getGroupNo());
-			pstmt.setInt(4, vo.getOrderNo());
-			pstmt.setInt(5, vo.getDepth());
-			pstmt.setLong(6, vo.getUserNo());
-			pstmt.setBoolean(7, vo.getRemoved());
-			
-			pstmt.executeUpdate();		
-								
-		} catch (SQLException e) {
-			System.out.println("error: " + e);
-		} finally {
-			try {
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}		
+		sqlSession.insert("board.insert", vo);
 	}
 	
-	public int getGno() {
-		Connection connection = null;		
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		int maxGno = 0;
-		try {
-			connection = getConnection();
-
-			String sql = "select max(g_no) from board";
-			pstmt = connection.prepareStatement(sql);						
-			rs = pstmt.executeQuery();		
-			
-			if(rs.next()) {
-				maxGno = rs.getInt(1);		
-			}
-			
-		} catch (SQLException e) {
-			System.out.println("error: " + e);
-		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}		
-		return maxGno;
+	public int getGno() {		
+		return sqlSession.selectOne("board.getGno");
 	}
 	
 	public void modify(BoardVo vo) {
-		Connection connection = null;		
-		PreparedStatement pstmt = null;
-		try {
-			connection = getConnection();
-
-			String sql = "update board set title=?, contents=? where no=?";
-			pstmt = connection.prepareStatement(sql);
-			pstmt.setString(1, vo.getTitle());
-			pstmt.setString(2, vo.getContents());	
-			pstmt.setLong(3, vo.getNo());
-			pstmt.executeUpdate();									
-		} catch (SQLException e) {
-			System.out.println("error: " + e);
-		} finally {
-			try {
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}		
+		sqlSession.update("board.modify", vo);		
 	}
+		
 	public List<BoardVo> getList(int page, int showCont, String keyWord) {
-		List<BoardVo> list = new ArrayList<BoardVo>();
-		Connection connection = null;		
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		String like = " ";
-		try {
-			connection = getConnection();
-			if(keyWord!=null) {
-				like= "and (title like '%"+keyWord+"%' or contents like '%"+keyWord+"%')";
-			}
-			
-			String sql = "select b.title, a.name, b.hit, date_format(b.reg_date, '%Y-%m-%d %H:%i:%s'),"
-								+ " b.no, b.user_no, b.depth, b.g_no, b.removed"								
-								+ " from user a, board b"
-								+ " where a.no = b.user_no "+ like 
-								+ " and "+  getWhere() 
-								+ " group by b.no"
-								+ " order by b.g_no desc, o_no asc"
-								+ " limit ?, ?";			
-			
-			pstmt = connection.prepareStatement(sql);			
-				pstmt.setInt(1, (page-1)*showCont);
-				pstmt.setInt(2, showCont);
-			
-			rs = pstmt.executeQuery();		
-			while(rs.next()) {
-				BoardVo vo = new BoardVo();	
-				
-				vo.setTitle(rs.getString(1));
-				vo.setUserName(rs.getString(2));
-				vo.setHit(rs.getInt(3));
-				vo.setRegDate(rs.getString(4));
-				vo.setNo(rs.getLong(5));
-				vo.setUserNo(rs.getLong(6));
-				vo.setDepth(rs.getInt(7));
-				vo.setGroupNo(rs.getInt(8));
-				vo.setRemoved(rs.getBoolean(9));
-				
-				list.add(vo);			
-			}
-			
-		} catch (SQLException e) {
-			System.out.println("error: " + e);
-		} finally {
-			try {
-				if (rs != null) {
-					rs.close();
-				}
-				if (pstmt != null) {
-					pstmt.close();
-				}
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}		
-		return list;
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("page", (page-1)*showCont);
+		map.put("showCont", showCont);
+		map.put("keyWord", keyWord);		
+		return sqlSession.selectList("board.getList", map);		
 	}
 	
-	public void upOderNo(int gNo, int oNo) {
+	public void updateOderNo(int gNo, int oNo) {
 		Connection connection = null;		
 		PreparedStatement pstmt = null;
 		try {
@@ -284,7 +153,7 @@ public class BoardDao {
 		return result;
 	}
 	
-	public void upHit(Long no, int hit) {
+	public void updateHit(Long no, int hit) {
 		Connection connection = null;		
 		PreparedStatement pstmt = null;
 		try {
